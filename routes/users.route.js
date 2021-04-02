@@ -144,4 +144,10 @@ router.post('/update', upload.single('photo'), async(req,res) => {
     })    
 })
 
+router.post('/delete', async(req,res) => {
+    const condition = {_id : req.body._id }
+    await User.deleteOne(condition)
+    res.send('Delete successfully')
+})
+
 module.exports = router;

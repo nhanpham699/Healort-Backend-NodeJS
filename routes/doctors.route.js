@@ -94,6 +94,12 @@ router.post('/update', async(req,res) => {
     res.send('update successfully')
 })
 
+router.post('/delete', async(req,res) => {
+    const condition = {_id : req.body._id }
+    await Doctor.deleteOne(condition)
+    res.send('Delete successfully')
+})
+
 router.post('/rate', async(req,res) => {
     const condition = {_id : req.body.doctorId }
     const data = await Doctor.findOne(condition)
