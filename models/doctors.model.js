@@ -2,6 +2,8 @@ const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
 const  JWT_KEY  = process.env.JWT_KEY
 
 const doctorSchema = new mongoose.Schema({   
@@ -18,6 +20,11 @@ const doctorSchema = new mongoose.Schema({
     hometown: String,
     phone: String,
     gender: String,
+    review: [{
+        rating: Number,
+        comment: String,
+        userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    }],
     tokens: [{
         token: {
             type: String,
@@ -57,9 +64,8 @@ doctorSchema.pre('save', async function (next) {
 })
 
 doctorSchema.statics.findByCredentials = async function (email, password) {
-    
-    const doctor = await doctor.findOne({ email } )
-    
+    const doctor = await Doctor.findOne({ email } )
+    console.log(doctor);
     if (!doctor) {
         throw new Error({ error: 'Invalid login credentials' })
     }

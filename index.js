@@ -12,9 +12,12 @@ var cookieParser = require('cookie-parser')
 
 var path = require('path');
 
-// const socketio = require('socket.io');
+const socketio = require('socket.io');
 const http = require('http');
 const server = http.createServer(app);
+const io = socketio(server, {
+  cors: true
+});
 
 
 
@@ -26,7 +29,7 @@ var schedulesRouter = require('./routes/schedules.route');
 
 server.listen(port, () => {
     console.log('listening on *:' + port);
-  });
+});
 
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.urlencoded({ extended: true}));
@@ -49,3 +52,12 @@ mongoose.connect(process.env.MONGO_URL, (err) =>{
 app.use('/users', usersRouter);
 app.use('/doctors', doctorsRouter)
 app.use('/schedules', schedulesRouter)
+
+
+io.on("connection", socket => {
+  console.log("a user connected :D");
+  socket.on("chat message", msg => {
+    console.log(msg);
+    io.emit("chat message", msg);
+  });
+});

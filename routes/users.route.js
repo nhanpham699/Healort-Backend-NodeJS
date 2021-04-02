@@ -31,7 +31,7 @@ router.post('/login', async(req, res) => {
             return res.status(250).send({error: 'Login failed!'})
         }
         const token = await user.generateAuthToken(tokenDevices)
-        console.log("saaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        // console.log("saaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         
         // console.log(user);
 
@@ -42,7 +42,8 @@ router.post('/login', async(req, res) => {
             address: user.address,
             date: user.date,
             phone: user.phone,
-            avatar: user.avatar
+            avatar: user.avatar,
+            gender: user.gender
         }
         res.send({ data, token })
     } catch (error) {
@@ -65,7 +66,7 @@ router.get('/logout', async(req,res) => {
     // console.log(req);
     const token = req.header('Authorization').replace('Bearer ', '')
     const data = jwt.verify(token, process.env.JWT_KEY)
-    // console.log(data, token);
+    console.log(data, token);
     try {
         const user = await User.findOne({ _id: data._id, 'tokens.token': token })
         if (!user) {
@@ -101,7 +102,6 @@ router.get('/getuser', async(req,res) => {
             avatar: user.avatar,
             gender: user.gender
         }
-        console.log(dataSending);
         res.send({dataSending})
         
     }catch{
@@ -134,17 +134,11 @@ router.post('/update', upload.single('photo'), async(req,res) => {
     }
     if(req.file){
         const avatar = '/' + req.file.path.replace('\\', "/").replace('\\', "/").replace('\\', "/");
-        set = {
-            ...set,
-            avatar: avatar
-        }
+        set = {...set, avatar: avatar}
     }
     User.updateOne(condition,set)
-    .then(() => {
-        User.findOne({_id: req.body.id})
-        .then(data => {
-            res.send('update successfully')
-        })
+    .then(() => {        
+        res.send('update successfully')
     }).catch( err => {
         res.send(err)
     })    
