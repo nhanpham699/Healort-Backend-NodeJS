@@ -19,12 +19,14 @@ const io = socketio(server, {
   cors: true
 });
 
-
+const Chat = require('./models/chat.model')
 
 var usersRouter = require('./routes/users.route');
 var doctorsRouter = require('./routes/doctors.route');
 var schedulesRouter = require('./routes/schedules.route');
-
+var chatRouter = require('./routes/chat.route');
+var medicinesRouter = require('./routes/medicines.route');
+var equipmentsRouter = require('./routes/equipments.route');
 
 
 server.listen(port, () => {
@@ -52,12 +54,39 @@ mongoose.connect(process.env.MONGO_URL, (err) =>{
 app.use('/users', usersRouter);
 app.use('/doctors', doctorsRouter)
 app.use('/schedules', schedulesRouter)
+app.use('/chat', chatRouter)
+app.use('/medicines', medicinesRouter)
+app.use('/equipments', equipmentsRouter)
+
+
+const { addUser, removeUser, getUser, getUsersInRoom } = require('./config/users');
 
 
 io.on("connection", socket => {
-  console.log("a user connected :D");
-  socket.on("chat message", msg => {
-    console.log(msg);
-    io.emit("chat message", msg);
-  });
+  socket.on('join', ({ name, room }, callback) => {
+      const { error, user } = addUser({ id: socket.id, name, room })
+
+      if(error) return callback(error);
+
+      socket.join(user.room)
+  })
+
+  socket.on('sendMessage', (message, callback) => {
+      const user = getUser(socket.id)
+
+      io.to(user.room).emit('message', { user: user.name, data: message })
+
+      Chat.findOne({ room: user.room })
+      .then(data => {
+          let { messages } = data;
+          messages.unshift(message[0]);
+          const newMessages = messages
+          const condition = {room: user.room}
+          const set = {messages: newMessages}
+        //   console.log(user.room, newMessages);
+          Chat.updateOne(condition, set)
+          .then(() => {})
+      })
+  })
+// 
 });

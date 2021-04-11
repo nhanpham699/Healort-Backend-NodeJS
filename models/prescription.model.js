@@ -1,16 +1,14 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const ScheduleSchema = new mongoose.Schema({ 
-    date: Date,  
-    begin: Number,
-    services: [],
+const PrescriptionSchema = new mongoose.Schema({ 
+    date: Date,
+    medicineId: { type: Schema.Types.ObjectId, ref: 'medicine' },
     doctorId: { type: Schema.Types.ObjectId, ref: 'doctor' },
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
     note: String,
-    status: Number,
     total: Number
 });
 
-const Schedule = mongoose.model('schedule', ScheduleSchema);
-module.exports = Schedule;
+const Prescription = mongoose.model('medicine', PrescriptionSchema);
+module.exports = Prescription;

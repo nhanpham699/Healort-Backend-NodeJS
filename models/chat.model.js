@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const chatSchema = new mongoose.Schema({
-    message:[{}],
+    messages: [],
     room: String,
 });
 const Chat = mongoose.model('Chat', chatSchema);

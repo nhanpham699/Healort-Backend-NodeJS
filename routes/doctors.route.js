@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var Doctor = require('../models/doctors.model');
+var Schedule = require('../models/schedules.model');
+
 const jwt = require('jsonwebtoken')
 
 
@@ -45,6 +47,44 @@ router.get('/getdoctor', async(req,res) => {
     }
 })
 
+router.get('/getdoctorbyid/:id', async(req,res) => {
+    const doctor = await Doctor.findOne({_id: req.params.id})
+    res.json(doctor)
+})
+
+router.get('/gettopdoctor', async(req,res) => {
+    let responseData = []
+    let data = []
+    const schedules = await Schedule.find({})
+        for(var i of schedules){
+            data.push(await Schedule.findOne({_id: i._id}).populate('doctorId').populate('userId'))
+        }
+    data = data.map(dt => dt.doctorId)
+
+    data.reduce((res, val) => { 
+        if (!res[val._id]) {
+          res[val._id] = {
+                _id: val._id,
+                email: val._email,
+                fullname: val.fullname,
+                phone: val.phone,
+                birthyear: val.birthyear,
+                hometown: val.hometown,
+                gender: val.gender,
+                review: val.review,
+                quantity : 0,
+            };
+          responseData.push(res[val._id])
+        }
+        res[val._id].quantity += 1;
+        return res;
+    }, {});
+
+    responseData = responseData.sort((a,b) => {
+        return b.quantity - a.quantity 
+    })
+    res.json(responseData)
+})
 
 router.get('/getalldoctors', async(req,res) => {
     const doctors = await Doctor.find({})
@@ -77,6 +117,26 @@ router.post('/login', async(req, res) => {
         res.send({ data, token })
     } catch (error) {
         res.status(250).send(error)
+    }
+})
+
+router.get('/logout', async(req,res) => {
+    // console.log(req);
+    const token = req.header('Authorization').replace('Bearer ', '')
+    const data = jwt.verify(token, process.env.JWT_KEY)
+    // console.log(data, token);
+    try {
+        const doctor = await Doctor.findOne({ _id: data._id, 'tokens.token': token })
+        if (!doctor) {
+            throw new Error()
+        }
+        // console.log(user);
+        await doctor.removeAuthToken(token)
+
+        res.status(250).send("logout successfully")
+        
+    }catch{
+        res.status(500).send("err")
     }
 })
 

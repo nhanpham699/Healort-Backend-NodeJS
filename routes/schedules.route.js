@@ -5,7 +5,7 @@ var Schedule = require('../models/schedules.model');
 router.post('/add', async(req,res) => {
     // console.log(req.body);
     const schedule = new Schedule(req.body)
-    schedule.save(() => {
+    await schedule.save(() => {
         res.status(250).send('add successfully!')
     })
 })
@@ -49,4 +49,13 @@ router.get('/getallschedules',async (req,res) => {
     res.send(responseData)
 })
 
+router.get('/getallbydoctor/:id', async (req,res) => {
+    const id = req.params.id
+    let responseData = []
+    const schedules = await Schedule.find({doctorId : id})
+        for(var i of schedules){
+            responseData.push(await Schedule.findOne({_id: i._id}).populate('doctorId').populate('userId'))
+        }
+    res.send(responseData)
+})
 module.exports = router;
