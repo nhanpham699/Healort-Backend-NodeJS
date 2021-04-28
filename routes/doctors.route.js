@@ -2,20 +2,29 @@ var express = require('express');
 var router = express.Router();
 var Doctor = require('../models/doctors.model');
 var Schedule = require('../models/schedules.model');
-
+// const multer = require("multer");
 const jwt = require('jsonwebtoken')
 
-
 router.post('/signup', async(req, res) => {
-    const doctor = new Doctor({
+    // const filename = req.file
+    // console.log(req.files,req.file, req.body,"daskdhga");
+    let data = {
         email: req.body.email,
-        password: req.body.password,
+        password: '12345',
         fullname: req.body.fullname,
         phone: req.body.phone,
         birthyear: req.body.birthyear,
         hometown: req.body.hometown,
-        gender: req.body.gender 
-    })
+        gender: req.body.gender,
+        experience: req.body.experience,
+    }
+    if(req.files){
+        const filename = req.files.file.name
+        req.files.file.mv(`${__dirname}/../uploads/images/doctors/${filename}`);
+        const avatar = '/uploads/images/doctors/' + filename
+        data = {...data, avatar: avatar}
+    }
+    const doctor = new Doctor(data)
     await doctor.save()
     res.send({action: true})
 })
@@ -37,7 +46,9 @@ router.get('/getdoctor', async(req,res) => {
             hometown: doctor.hometown,
             birthyear: doctor.birthyear,
             phone: doctor.phone,
-            gender: doctor.gender
+            gender: doctor.gender,
+            avatar: doctor.avatar,
+            experience: doctor.experience
         }
         console.log(dataSending);
         res.send({dataSending})
@@ -72,6 +83,8 @@ router.get('/gettopdoctor', async(req,res) => {
                 hometown: val.hometown,
                 gender: val.gender,
                 review: val.review,
+                avatar: val.avatar,
+                experience: val.experience,
                 quantity : 0,
             };
           responseData.push(res[val._id])
@@ -86,6 +99,54 @@ router.get('/gettopdoctor', async(req,res) => {
     res.json(responseData)
 })
 
+router.get('/getbaddoctor', async(req,res) => {
+    let responseData = []
+    let data = []
+    const schedules = await Schedule.find({})
+        for(var i of schedules){
+            data.push(await Schedule.findOne({_id: i._id}).populate('doctorId').populate('userId'))
+        }
+    data = data.map(dt => dt.doctorId)
+
+    data.reduce((res, val) => { 
+        if (!res[val._id]) {
+          res[val._id] = {
+                _id: val._id,
+                email: val._email,
+                fullname: val.fullname,
+                phone: val.phone,
+                birthyear: val.birthyear,
+                hometown: val.hometown,
+                gender: val.gender,
+                review: val.review,
+                avatar: val.avatar,
+                experience: val.experience,
+                quantity : 0,
+            };
+          responseData.push(res[val._id])
+        }
+        res[val._id].quantity += 1;
+        return res;
+    }, {});
+    responseData = responseData.sort((a,b) => {
+        return a.quantity - b.quantity 
+    })    
+    const dataTest = responseData.map(dt => dt._id)
+    const doctors = await Doctor.find({})
+    // console.log(dataTest);
+    const doctorFilter = doctors.filter(dt => {
+        // console.log(dt._id)
+        return dataTest.toString().indexOf(dt._id) === -1
+    })
+    // console.log(doctorFilter);
+    // const doctorsFilter = doctors.filter(dt => dataTest.indexOf(dt._id) != -1)
+    for (let doctor of doctorFilter){
+         responseData.unshift(doctor)
+    }
+
+    res.json(responseData)
+})
+
 router.get('/getalldoctors', async(req,res) => {
     const doctors = await Doctor.find({})
     res.json(doctors)
@@ -93,7 +154,7 @@ router.get('/getalldoctors', async(req,res) => {
 
 router.post('/login', async(req, res) => {
     try {
-        const tokenDevices = 'Iphone'
+        const tokenDevices = req.body.tokenDevices
         const { email, password } = req.body
         const doctor = await Doctor.findByCredentials(email, password)
         // console.log(doctor);
@@ -112,7 +173,9 @@ router.post('/login', async(req, res) => {
             hometown: doctor.hometown,
             birthyear: doctor.birthyear,
             phone: doctor.phone,
-            gender: doctor.gender
+            gender: doctor.gender,
+            avatar: doctor.avatar,
+            experience: doctor.experience
         }
         res.send({ data, token })
     } catch (error) {
@@ -149,6 +212,7 @@ router.post('/update', async(req,res) => {
         gender: req.body.gender,
         phone: req.body.phone,
         hometown: req.body.hometown,
+        experience: req.body.experience
     }
     await Doctor.updateOne(condition,set)
     res.send('update successfully')

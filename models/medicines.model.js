@@ -5,7 +5,6 @@ const MedicineSchema = new mongoose.Schema({
     name: String,
     quantity: Number,
     type: String,
-    times: Number,
     price: Number,
     seller: String,
     date: String

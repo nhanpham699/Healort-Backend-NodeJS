@@ -9,7 +9,13 @@ const ScheduleSchema = new mongoose.Schema({
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
     note: String,
     status: Number,
-    total: Number
+    total: Number,
+    confirmation: {
+        date: Date,
+        begin: Number
+    },
+    reexam: Number,
+    prescription: Number
 });
 
 const Schedule = mongoose.model('schedule', ScheduleSchema);

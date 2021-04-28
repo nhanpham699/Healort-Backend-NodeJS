@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 var cors = require('cors');
 const bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser')
-
+// const fileUpload = require('express-fileupload');
 var path = require('path');
 
 const socketio = require('socket.io');
@@ -24,9 +24,11 @@ const Chat = require('./models/chat.model')
 var usersRouter = require('./routes/users.route');
 var doctorsRouter = require('./routes/doctors.route');
 var schedulesRouter = require('./routes/schedules.route');
+var reexamsRouter = require('./routes/reexams.route');
 var chatRouter = require('./routes/chat.route');
 var medicinesRouter = require('./routes/medicines.route');
 var equipmentsRouter = require('./routes/equipments.route');
+var notificationsRouter = require('./routes/notifications.route');
 
 
 server.listen(port, () => {
@@ -38,7 +40,7 @@ app.use(bodyParser.urlencoded({ extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads',express.static(path.join(__dirname, '/uploads')));  
-
+// app.use(fileUpload());
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -57,6 +59,10 @@ app.use('/schedules', schedulesRouter)
 app.use('/chat', chatRouter)
 app.use('/medicines', medicinesRouter)
 app.use('/equipments', equipmentsRouter)
+app.use('/notifications', notificationsRouter)
+app.use('/reexams', reexamsRouter)
+
+
 
 
 const { addUser, removeUser, getUser, getUsersInRoom } = require('./config/users');
@@ -88,5 +94,8 @@ io.on("connection", socket => {
           .then(() => {})
       })
   })
-// 
+  socket.on('dis', () => {
+    console.log('user had left!!!!');
+    const user = removeUser(socket.id);
+  })
 });

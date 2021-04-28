@@ -11,51 +11,108 @@ router.post('/add', async(req,res) => {
 })
 
 router.post('/update', async(req,res) => {
-    console.log(req.body);
-
+    // console.log(req.body);
     const condition = {_id: req.body.id}
-    const set = {
-        date: req.body.date,
-        begin: req.body.begin,
+    let set = {}
+
+    if(req.body.begin){
+        set = {
+            date: req.body.date,
+            begin: req.body.begin,
+            confirmation: null
+        }
+    }else {
+        const scheduleData = await Schedule.findOne(condition)
+        const confirmation = scheduleData.confirmation
+        set = {
+            date: confirmation.date,
+            begin: confirmation.begin,
+            confirmation: null
+        }
     }
     await Schedule.updateOne(condition,set)
-    res.send("update successfully")
+    const schedule = await Schedule.findOne(condition)
+    .populate('doctorId')
+    .populate('userId')
+    // console.log(schedule);
+    res.send(schedule)
       
 })
 
+router.post('/examed', async(req,res) => {
+    // console.log(req.body);
+    const condition = {_id: req.body.id}
+    const set = {
+        status: 1
+    }
+    await Schedule.updateOne(condition,set)
+    res.send("update successfully")
+})
+
+router.post('/updateReexam', async(req,res) => {
+    const condition = {_id: req.body.id}
+    const set = {reexam: 1}
+    await Schedule.updateOne(condition, set)
+    res.send("update reexam successfully")
+})
+
+router.post('/updatePrescription', async(req,res) => {
+    const condition = {_id: req.body.id}
+    const set = {prescription: 1}
+    await Schedule.updateOne(condition, set)
+    res.send("update prescription successfully")
+})
+
 router.post('/delete', async(req,res) => {
-    await Schedule.deleteOne({_id : req.body.id})
+    const condition = {_id: req.body.id}
+    await Schedule.deleteOne(condition)
     res.send("Delete successfully!")
 })
 
 
 router.get('/getallschedules/:id',async (req,res) => {
     const id = req.params.id
-    let responseData = []
-    const schedules = await Schedule.find({userId : id})
-        for(var i of schedules){
-            responseData.push(await Schedule.findOne({_id: i._id}).populate('doctorId'))
-        }
-    res.send(responseData)
+    const schedules = await Schedule.find({userId: id})
+    .populate('doctorId')
+    .populate('userId')
+    .sort({date: -1})
+    res.send(schedules)
 })
 
+router.get('/getschedulebyid/:id', async(req, res) => {
+    const condition = {_id: req.params.id}
+    const schedule = await Schedule.findOne(condition)
+    res.json(schedule)
+})
 
 router.get('/getallschedules',async (req,res) => {
-    let responseData = []
     const schedules = await Schedule.find({})
-        for(var i of schedules){
-            responseData.push(await Schedule.findOne({_id: i._id}).populate('doctorId').populate('userId'))
-        }
-    res.send(responseData)
+    .populate('doctorId')
+    .populate('userId')
+    .sort({date: -1})
+    res.send(schedules)
 })
 
 router.get('/getallbydoctor/:id', async (req,res) => {
     const id = req.params.id
-    let responseData = []
-    const schedules = await Schedule.find({doctorId : id})
-        for(var i of schedules){
-            responseData.push(await Schedule.findOne({_id: i._id}).populate('doctorId').populate('userId'))
-        }
-    res.send(responseData)
+    const schedules = await Schedule.find({doctorId: id})
+    .populate('doctorId')
+    .populate('userId')
+    .sort({date: -1})
+    res.send(schedules)
 })
+
+router.post('/confirmation', async (req,res) => {
+    const condition = { _id: req.body.id }
+
+    const dataset = {
+        date: req.body.date,
+        begin: req.body.begin,
+    }
+    const set = { confirmation : dataset }
+    console.log(set);
+    await Schedule.updateOne(condition,set)
+    res.send("update successfully!")
+})
+
 module.exports = router;

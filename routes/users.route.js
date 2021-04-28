@@ -17,24 +17,16 @@ var storage = multer.diskStorage({
 })
 const upload = multer({storage: storage});
 
-
-
 router.post('/login', async(req, res) => {
     try {
-
-        const tokenDevices = 'Iphone'
-        const { email, password } = req.body
-        
+        const { email, password, tokenDevices } = req.body 
         const user = await User.findByCredentials(email, password)
 
         if (!user) {
             return res.status(250).send({error: 'Login failed!'})
         }
-        const token = await user.generateAuthToken(tokenDevices)
-        // console.log("saaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        
-        // console.log(user);
 
+        const token = await user.generateAuthToken(tokenDevices)
         const data = {
             id: user._id,
             email: user.email,
