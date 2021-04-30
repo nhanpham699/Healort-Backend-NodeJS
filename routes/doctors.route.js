@@ -237,11 +237,13 @@ router.post('/delete', async(req,res) => {
 router.post('/rate', async(req,res) => {
     const condition = {_id : req.body.doctorId }
     const data = await Doctor.findOne(condition)
+    console.log(req.body);
     const set = {
             review: [...data.review,{
                 rating: req.body.rating,
                 comment: req.body.comment,
                 userId: req.body.userId,
+                scheduleId: req.body.scheduleId
             }]
         } 
     await Doctor.updateOne(condition,set) 

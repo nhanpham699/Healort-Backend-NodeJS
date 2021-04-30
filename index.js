@@ -84,6 +84,7 @@ io.on("connection", socket => {
 
       Chat.findOne({ room: user.room })
       .then(data => {
+          console.log(message[0]);
           let { messages } = data;
           messages.unshift(message[0]);
           const newMessages = messages

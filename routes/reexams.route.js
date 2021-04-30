@@ -64,7 +64,7 @@ router.post('/delete', async(req,res) => {
 })
 
 router.post('/examed', async(req,res) => {
-    // console.log(req.body);
+    console.log(req.body);
     const condition = {_id: req.body.id}
     const set = {
         status: 1

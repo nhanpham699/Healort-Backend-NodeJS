@@ -26,6 +26,7 @@ const doctorSchema = new mongoose.Schema({
         rating: Number,
         comment: String,
         userId: { type: Schema.Types.ObjectId, ref: 'User' },
+        scheduleId: { type: Schema.Types.ObjectId, ref: 'schedule' },
     }],
     tokens: [{
         token: {
