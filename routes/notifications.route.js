@@ -33,6 +33,7 @@ router.get('/getnotificationsbyuser/:id', async (req,res) => {
     const notification = await Notification.find(condition)
     .populate('doctorId')
     .populate('scheduleId')
+    .populate('reexamId')
     .sort({date: -1})
     .limit(10)
 

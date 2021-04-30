@@ -2,12 +2,24 @@ var express = require('express');
 var router = express.Router();
 var Doctor = require('../models/doctors.model');
 var Schedule = require('../models/schedules.model');
-// const multer = require("multer");
+const multer = require("multer");
 const jwt = require('jsonwebtoken')
 
-router.post('/signup', async(req, res) => {
+
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "./uploads/images/doctors")
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + file.originalname)
+    }
+})
+const upload = multer({storage: storage});
+
+
+router.post('/signup',  upload.single('photo'), async(req, res) => {
     // const filename = req.file
-    // console.log(req.files,req.file, req.body,"daskdhga");
+    console.log(req.file);
     let data = {
         email: req.body.email,
         password: '12345',
@@ -18,10 +30,8 @@ router.post('/signup', async(req, res) => {
         gender: req.body.gender,
         experience: req.body.experience,
     }
-    if(req.files){
-        const filename = req.files.file.name
-        req.files.file.mv(`${__dirname}/../uploads/images/doctors/${filename}`);
-        const avatar = '/uploads/images/doctors/' + filename
+    if(req.file){
+        const avatar = '/' + req.file.path.replace('\\', "/").replace('\\', "/").replace('\\', "/");
         data = {...data, avatar: avatar}
     }
     const doctor = new Doctor(data)
@@ -32,7 +42,7 @@ router.post('/signup', async(req, res) => {
 router.get('/getdoctor', async(req,res) => {
     const token = req.header('Authorization').replace('Bearer ', '')
     const data = jwt.verify(token, process.env.JWT_KEY)
-
+    console.log(token);
     try {
         const doctor = await Doctor.findOne({ _id: data._id, 'tokens.token': token })
         if (!doctor) {
@@ -227,38 +237,15 @@ router.post('/delete', async(req,res) => {
 router.post('/rate', async(req,res) => {
     const condition = {_id : req.body.doctorId }
     const data = await Doctor.findOne(condition)
-    let flag = true
-    let set = {}
-    if(data){
-        for(var i=0; i< data.review.length; i++){
-            if(data.review[i].userId == req.body.userId){
-                set = {
-                    review: [...data.review.slice(0,i),
-                        {
-                            rating: req.body.rating,
-                            comment: req.body.comment,
-                            userId: req.body.userId,
-                        },...data.review.slice(i+1)
-                    ]
-                }     
-                flag = false
-                break;
-            }
-        }
-        if(flag) {
-            set = {
-                review: [...data.review,{
-                    rating: req.body.rating,
-                    comment: req.body.comment,
-                    userId: req.body.userId,
-                }]
-            } 
-        }
-        await Doctor.updateOne(condition,set) 
-        res.send('rate successfully')
-    }
-    
-
+    const set = {
+            review: [...data.review,{
+                rating: req.body.rating,
+                comment: req.body.comment,
+                userId: req.body.userId,
+            }]
+        } 
+    await Doctor.updateOne(condition,set) 
+    res.send('rate successfully')
 })
 
 module.exports = router;

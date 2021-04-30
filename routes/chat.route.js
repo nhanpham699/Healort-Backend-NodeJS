@@ -19,11 +19,11 @@ router.get('/showMessages/:room',  async(req, res) => {
     res.json(data)
 })
 
-router.get('/showListChat', async(req, res) => {
+router.get('/getUserListMessages/:id', async(req, res) => {
     const chat = await Chat.find()
     const list = chat.filter(dt => {
-        const id = room.slice(0, dt.room.indexOf("_"));
-        return id == req.body.id
+        const id = dt.room.slice(dt.room.indexOf("_") + 1);
+        return id == req.params.id
     })
     res.json(list)
 })

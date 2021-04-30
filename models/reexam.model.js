@@ -8,7 +8,11 @@ const ReexamSchema = new mongoose.Schema({
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
     scheduleId: { type: Schema.Types.ObjectId, ref: 'schedule' },
     status: Number,
-    total: Number
+    times: Number,
+    confirmation: {
+        date: Date,
+        begin: Number
+    },
 });
 
 const Reexam = mongoose.model('reexam', ReexamSchema);

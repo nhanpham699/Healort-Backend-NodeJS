@@ -56,7 +56,7 @@ mongoose.connect(process.env.MONGO_URL, (err) =>{
 app.use('/users', usersRouter);
 app.use('/doctors', doctorsRouter)
 app.use('/schedules', schedulesRouter)
-app.use('/chat', chatRouter)
+app.use('/chats', chatRouter)
 app.use('/medicines', medicinesRouter)
 app.use('/equipments', equipmentsRouter)
 app.use('/notifications', notificationsRouter)
