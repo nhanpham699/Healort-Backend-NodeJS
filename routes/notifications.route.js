@@ -11,6 +11,7 @@ router.post('/add', async(req,res) => {
 
 router.post('/update', async(req,res) => {
     const condition = {_id: req.body.id}
+    console.log(condition);
     const set = { status : 1}
     await Notification.updateOne(condition,set)
     .then(() => {
@@ -23,7 +24,7 @@ router.get('/getnotificationsbydoctor/:id', async (req,res) => {
     const notification = await Notification.find(condition)
     .populate('userId')
     .sort({date: -1})
-    .limit(10)
+    .limit(15)
     
     res.json(notification)
 })  
@@ -35,7 +36,7 @@ router.get('/getnotificationsbyuser/:id', async (req,res) => {
     .populate('scheduleId')
     .populate('reexamId')
     .sort({date: -1})
-    .limit(10)
+    .limit(15)
 
     res.json(notification)
 }) 

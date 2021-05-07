@@ -28,6 +28,15 @@ router.get('/getUserListMessages/:id', async(req, res) => {
     res.json(list)
 })
 
+router.get('/getDoctorListMessages/:id', async(req, res) => {
+    const chat = await Chat.find()
+    const list = chat.filter(dt => {
+        const id = dt.room.slice(0, dt.room.indexOf("_"));
+        return id == req.params.id
+    })
+    res.json(list)
+})
+
 
 
 module.exports = router;

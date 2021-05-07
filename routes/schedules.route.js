@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Schedule = require('../models/schedules.model');
+var axios = require('axios')
 
 router.post('/add', async(req,res) => {
     // console.log(req.body);
@@ -75,7 +76,7 @@ router.get('/getallschedules/:id',async (req,res) => {
     const schedules = await Schedule.find({userId: id})
     .populate('doctorId')
     .populate('userId')
-    .sort({date: -1})
+    .sort({date: 1})
     res.send(schedules)
 })
 
@@ -89,7 +90,7 @@ router.get('/getallschedules',async (req,res) => {
     const schedules = await Schedule.find({})
     .populate('doctorId')
     .populate('userId')
-    .sort({date: -1})
+    .sort({date: 1})
     res.send(schedules)
 })
 
@@ -98,7 +99,7 @@ router.get('/getallbydoctor/:id', async (req,res) => {
     const schedules = await Schedule.find({doctorId: id})
     .populate('doctorId')
     .populate('userId')
-    .sort({date: -1})
+    .sort({date: 1})
     res.send(schedules)
 })
 
@@ -115,4 +116,61 @@ router.post('/confirmation', async (req,res) => {
     res.send("update successfully!")
 })
 
+const n = 3600000
+
+setInterval( async() => { 
+    try {
+        const currentDate = new Date()
+        const date = currentDate.getDate()
+        const hour = currentDate.getHours() + 1
+        await Schedule.find()
+        .populate("userId")
+        .populate("doctorId")
+        .then(async (data) => {
+            const schedule = data.filter(dt => {
+                return dt.date.getDate() == date && dt.begin == hour
+            })
+        
+            const newData = schedule.map(dt => {
+                return { userTokens: dt.userId.tokens, doctorTokens: dt.doctorId.tokens}
+            })
+            // console.log(newData);
+            for(let i of newData){
+                for(let token of i.userTokens){
+                    await sendPushNotification(token.tokenDevices)
+                }
+                for(let token of i.doctorTokens){
+                    await sendPushNotification(token.tokenDevices)
+                }
+            }
+        })
+    }catch {
+        console.log("err");
+    }
+    
+}, n)
+
+async function sendPushNotification(expoPushToken) {
+    const message = {
+        to: expoPushToken,
+        sound: 'default',
+        title: 'Schedule reminder',
+        body: 'You have an appointment in the next hour',
+        data: { someData: 'goes here' },
+    }
+
+    console.log(message);
+    await axios.post('https://exp.host/--/api/v2/push/send', JSON.stringify(message), {
+        headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          }
+       
+    }).then(()=>{
+        console.log('jihih');
+    }).catch((e)=>{
+        console.log('err',e);
+    });
+ }
 module.exports = router;

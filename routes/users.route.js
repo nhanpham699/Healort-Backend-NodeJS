@@ -58,7 +58,7 @@ router.get('/logout', async(req,res) => {
     // console.log(req);
     const token = req.header('Authorization').replace('Bearer ', '')
     const data = jwt.verify(token, process.env.JWT_KEY)
-    console.log(data, token);
+    // console.log(data, token);
     try {
         const user = await User.findOne({ _id: data._id, 'tokens.token': token })
         if (!user) {
@@ -72,6 +72,14 @@ router.get('/logout', async(req,res) => {
     }catch{
         res.status(500).send("err")
     }
+})
+
+router.get('/getuserbyid/:id', async(req,res) => {
+    // console.log(req.params.id);
+    const condition = {_id: req.params.id}
+    const user = await User.findOne(condition)
+    // console.log(user);
+    res.json(user)
 })
 
 router.get('/getuser', async(req,res) => {
@@ -102,11 +110,8 @@ router.get('/getuser', async(req,res) => {
 })
 
 router.get('/getallusers', async(req,res) => {
-    User.find({}).then(data => {
-        res.json(data)
-    }).catch(err => {
-        console.log(err)
-    })
+    const user = await User.find()
+    res.json(user)
 })
 
 router.post('/update', upload.single('photo'), async(req,res) => {

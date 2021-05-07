@@ -3,12 +3,25 @@ var router = express.Router();
 var Reexam = require('../models/reexam.model');
 
 router.post('/add', async(req,res) => {
-   
-    const data = {...req.body, times: 1}
-    const reexam = new Reexam(data)
-    await reexam.save(() => {
-        res.status(250).send('add successfully!')
-    })
+    const condition = {scheduleId: req.body.scheduleId}
+    const oldReexam = await Reexam.findOne(condition)
+    let data = {...req.body}
+
+    if(oldReexam){
+        data = {
+            ...data,
+            times: ++ oldReexam.times,
+            status: 0
+        }
+        await Reexam.updateOne(condition, data)
+        res.status(250).send('update successfully!')
+    }else{
+        data = {...data, times: 1}
+        const reexam = new Reexam(data)
+        await reexam.save(() => {
+            res.status(250).send('add successfully!')
+        })
+    }
 })
 
 router.get('/getallreexamsbyuser/:id', async(req,res) => {
@@ -44,7 +57,7 @@ router.post('/update', async(req,res) => {
     const reexam = await Reexam.findOne(condition)
     .populate('doctorId')
     .populate('userId')
-    // console.log(schedule);
+    console.log(reexam);
     res.send(reexam)
       
 })
@@ -53,7 +66,7 @@ router.get('/getallreexams',async (req,res) => {
     const reexams = await Reexam.find({})
     .populate('doctorId')
     .populate('userId')
-    .sort({date: -1})
+    .sort({date: 1})
     res.send(reexams)
 })
 
@@ -79,7 +92,7 @@ router.get('/getallreexamsbydoctor/:id', async (req,res) => {
     .populate('doctorId')
     .populate('userId')
     .populate('scheduleId')
-    .sort({date: -1})
+    .sort({date: 1})
     res.send(reexams)
 })
 

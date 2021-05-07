@@ -6,7 +6,7 @@ const PrescriptionSchema = new mongoose.Schema({
     medicine: [
         {
             price: Number,
-            medicineId: { type: Schema.Types.ObjectId, ref: 'medicine' },
+            name: String,
             quantity: Number
         }
     ],

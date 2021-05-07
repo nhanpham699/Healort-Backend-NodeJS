@@ -29,6 +29,8 @@ var chatRouter = require('./routes/chat.route');
 var medicinesRouter = require('./routes/medicines.route');
 var equipmentsRouter = require('./routes/equipments.route');
 var notificationsRouter = require('./routes/notifications.route');
+var absencesRouter = require('./routes/absence.route');
+
 
 
 server.listen(port, () => {
@@ -61,6 +63,7 @@ app.use('/medicines', medicinesRouter)
 app.use('/equipments', equipmentsRouter)
 app.use('/notifications', notificationsRouter)
 app.use('/reexams', reexamsRouter)
+app.use('/absences', absencesRouter)
 
 
 

@@ -9,6 +9,13 @@ router.get('/getallmedicines', async(req, res) => {
     res.json(medicine)
 })
 
+router.get('/getallpres/:id', async(req, res) => {
+    const pres = await Prescription.find({userId: req.params.id})
+    .populate('doctorId')
+    .populate('scheduleId')
+    res.json(pres)
+})
+
 router.post('/add', async(req, res) => {
     const medicine = new Medicine({
         name: req.body.name,
@@ -42,10 +49,10 @@ router.post('/delete', async(req,res) => {
     res.send('Delete successfully')
 })
 
-router.get('/getpricebyid/:id', async(req,res) => {
+router.get('/getmedicinebyid/:id', async(req,res) => {
     const condition = {_id : req.params.id}
-    const { price } = await Medicine.findOne(condition)
-    res.json(price);
+    const medicine = await Medicine.findOne(condition)
+    res.json(medicine);
 })
 
 router.post('/addpres', async(req,res) => {
