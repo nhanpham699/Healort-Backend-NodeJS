@@ -1,27 +1,25 @@
 var express = require('express');
 var router = express.Router();
-var Medicine = require('../models/medicines.model');
 var Prescription = require('../models/prescription.model');
 
-
-router.get('/getallmedicines', async(req, res) => {
-    const medicine = await Medicine.find({})
-    res.json(medicine)
+router.post('/addpres', async(req,res) => {
+    const pres = new Prescription(req.body)
+    await pres.save()
+    res.send({action: true}) 
 })
 
+router.get('/getallpres/:id', async(req, res) => {
+    const pres = await Prescription.find({userId: req.params.id})
+    .populate('doctorId')
+    .populate('scheduleId')
+    res.json(pres)
+})
 
-
-router.post('/add', async(req, res) => {
-    const medicine = new Medicine({
-        name: req.body.name,
-        quantity: Number(req.body.quantity),
-        type: req.body.type,
-        price: Number(req.body.price),
-        seller: req.body.seller,
-        date: req.body.date,
-    })
-    await medicine.save()
-    res.send({action: true})
+router.get('/getallprescriptions', async(req, res) => {
+    const pres = await Prescription.find()
+    .populate('doctorId')
+    .populate('userId')
+    res.json(pres)
 })
 
 router.post('/update', async(req,res) => {
@@ -42,12 +40,6 @@ router.post('/delete', async(req,res) => {
     const condition = {_id : req.body._id }
     await Medicine.deleteOne(condition)
     res.send('Delete successfully')
-})
-
-router.get('/getmedicinebyid/:id', async(req,res) => {
-    const condition = {_id : req.params.id}
-    const medicine = await Medicine.findOne(condition)
-    res.json(medicine);
 })
 
 module.exports = router;

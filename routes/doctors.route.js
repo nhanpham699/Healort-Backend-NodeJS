@@ -81,7 +81,7 @@ router.get('/gettopdoctor', async(req,res) => {
             data.push(await Schedule.findOne({_id: i._id}).populate('doctorId').populate('userId'))
         }
     data = data.map(dt => dt.doctorId)
-
+    
     data.reduce((res, val) => { 
         if (!res[val._id]) {
           res[val._id] = {
@@ -164,8 +164,7 @@ router.get('/getalldoctors', async(req,res) => {
 
 router.post('/login', async(req, res) => {
     try {
-        const tokenDevices = req.body.tokenDevices
-        const { email, password } = req.body
+        const { email, password, tokenDevices } = req.body
         const doctor = await Doctor.findByCredentials(email, password)
         // console.log(doctor);
         if (!doctor) {
@@ -173,7 +172,6 @@ router.post('/login', async(req, res) => {
         }
         const token = await doctor.generateAuthToken(tokenDevices)
         // console.log("saaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        console.log(token);
         // console.log(doctor);
 
         const data = {
@@ -189,7 +187,7 @@ router.post('/login', async(req, res) => {
         }
         res.send({ data, token })
     } catch (error) {
-        res.status(250).send(error)
+        res.status(400).send(error)
     }
 })
 

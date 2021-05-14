@@ -105,16 +105,94 @@ router.get('/getallbydoctor/:id', async (req,res) => {
 
 router.post('/confirmation', async (req,res) => {
     const condition = { _id: req.body.id }
-
     const dataset = {
         date: req.body.date,
-        begin: req.body.begin,
+        begin: req.body.begin
     }
     const set = { confirmation : dataset }
-    console.log(set);
+
     await Schedule.updateOne(condition,set)
     res.send("update successfully!")
 })
+
+function getMonday(d) {
+    d = new Date(d);
+    var day = d.getDay(),
+        diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+    return new Date(d.setDate(diff));
+}
+
+router.get('/getschedulesbyweek/:week', async (req, res) => {
+    const schedules = await Schedule.find({status: 1})
+    const date = new Date()
+    const currentMonth = date.getMonth()
+    const { week } = req.params
+    const d = getMonday(new Date()) 
+    let firstDate = d
+
+    
+    if(week == 1){
+        firstDate = new Date(d.setDate(d.getDate() - 7))
+    }else if(week == 2){
+        firstDate = new Date(d.setDate(d.getDate() - 7*2))
+    }
+
+    const schedulesMonth = schedules.filter(dt => dt.date.getMonth() == currentMonth)
+    const dayArr = [firstDate.getDate()]
+    for(let i=1; i<=6; i++){
+        dayArr.push(new Date(firstDate.setDate(firstDate.getDate() + 1)).getDate())
+    } 
+
+    const newData = schedulesMonth.filter(dt => dayArr.indexOf(dt.date.getDate()) != -1 )
+
+    const responseData = []
+
+    newData.reduce((res, val) => { 
+        if (!res[val.date.getDate()]) {
+          res[val.date.getDate()] = {
+                date: val.date.getDate(),  
+                total: 0,
+                quantity: 0,
+            };
+          responseData.push(res[val.date.getDate()])
+        }
+        res[val.date.getDate()].total += val.total 
+        res[val.date.getDate()].quantity += 1 
+        return res
+    }, {});
+
+    res.json(responseData);
+
+})
+
+router.get('/getschedulesbyyear/:year', async (req, res) => {
+    const schedules = await Schedule.find()
+    const yearData = schedules.filter(dt => {
+        return dt.date.getFullYear() == req.params.year && dt.status == 1
+    })
+    const responseData = []
+
+    yearData.reduce((res, val) => { 
+        if (!res[val.date.getMonth() + 1]) {
+          res[val.date.getMonth() + 1] = {
+                month: val.date.getMonth() + 1,  
+                total: 0,
+                quantity: 0,
+            };
+          responseData.push(res[val.date.getMonth() + 1])
+        }
+        res[val.date.getMonth() + 1].total += val.total 
+        res[val.date.getMonth() + 1].quantity += 1 
+        return res
+    }, {});
+
+    const newData = responseData.sort((a,b) => {
+        return a.month - b.month
+    })
+
+    res.json(newData)
+})
+
 
 const n = 3600000
 

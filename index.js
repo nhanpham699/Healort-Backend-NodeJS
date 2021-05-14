@@ -27,11 +27,10 @@ var schedulesRouter = require('./routes/schedules.route');
 var reexamsRouter = require('./routes/reexams.route');
 var chatRouter = require('./routes/chat.route');
 var medicinesRouter = require('./routes/medicines.route');
-var equipmentsRouter = require('./routes/equipments.route');
 var notificationsRouter = require('./routes/notifications.route');
 var absencesRouter = require('./routes/absence.route');
-
-
+var adminsRouter = require('./routes/admin.route');
+var prescriptionsRouter = require('./routes/prescription.route');
 
 server.listen(port, () => {
     console.log('listening on *:' + port);
@@ -60,16 +59,16 @@ app.use('/doctors', doctorsRouter)
 app.use('/schedules', schedulesRouter)
 app.use('/chats', chatRouter)
 app.use('/medicines', medicinesRouter)
-app.use('/equipments', equipmentsRouter)
 app.use('/notifications', notificationsRouter)
 app.use('/reexams', reexamsRouter)
 app.use('/absences', absencesRouter)
+app.use('/admins', adminsRouter)
+app.use('/prescriptions', prescriptionsRouter)
 
 
 
 
-const { addUser, removeUser, getUser, getUsersInRoom } = require('./config/users');
-
+const { addUser, removeUser, getUser} = require('./config/users');
 
 io.on("connection", socket => {
   socket.on('join', ({ name, room }, callback) => {
