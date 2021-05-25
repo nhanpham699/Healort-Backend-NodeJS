@@ -86,13 +86,40 @@ router.post('/examed', async(req,res) => {
     res.send("update successfully")
 })
 
+router.post('/success', async(req,res) => {
+    // console.log(req.body);
+    const condition = {_id: req.body.id}
+    const set = {
+        status: 3
+    }
+    await Reexam.updateOne(condition,set)
+    res.send("update successfully")
+})
+
+router.post('/notcome', async(req,res) => {
+    // console.log(req.body);
+    const condition = {_id: req.body.id}
+    const set = {
+        status: 2
+    }
+    await Reexam.updateOne(condition,set)
+    res.send("update successfully")
+})
+
+router.post('/noreply', async (req,res) => {
+    const condition = { _id: req.body.id }
+    const set = { confirmation : null }
+    await Reexam.updateOne(condition,set)
+    res.send("update successfully!")
+})
+
 router.get('/getallreexamsbydoctor/:id', async (req,res) => {
     const id = req.params.id
     const reexams = await Reexam.find({doctorId: id})
     .populate('doctorId')
     .populate('userId')
     .populate('scheduleId')
-    .sort({date: 1})
+    .sort({status:1, date: 1})
     res.send(reexams)
 })
 

@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const PrescriptionSchema = new mongoose.Schema({ 
     date: Date,
     medicine: [
-        {
+        {   
             price: Number,
             name: String,
             quantity: Number

@@ -50,4 +50,16 @@ router.get('/getmedicinebyid/:id', async(req,res) => {
     res.json(medicine);
 })
 
+router.post('/purchase', async(req,res) => {
+    for(let med of req.body.medicine){
+        const medicine = await Medicine.findOne({_id: med.value})
+        if(medicine){
+            const condition = {_id: med.value}
+            const set = {quantity: medicine.quantity - med.quantity*req.body.times}
+            await Medicine.updateOne(condition,set)
+            res.send("update successfully")
+        }
+    }
+})
+
 module.exports = router;

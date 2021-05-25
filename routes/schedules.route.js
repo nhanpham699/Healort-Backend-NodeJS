@@ -50,6 +50,26 @@ router.post('/examed', async(req,res) => {
     res.send("update successfully")
 })
 
+router.post('/success', async(req,res) => {
+    // console.log(req.body);
+    const condition = {_id: req.body.id}
+    const set = {
+        status: 3
+    }
+    await Schedule.updateOne(condition,set)
+    res.send("update successfully")
+})
+
+router.post('/notcome', async(req,res) => {
+    // console.log(req.body);
+    const condition = {_id: req.body.id}
+    const set = {
+        status: 2
+    }
+    await Schedule.updateOne(condition,set)
+    res.send("update successfully")
+})
+
 router.post('/updateReexam', async(req,res) => {
     const condition = {_id: req.body.id}
     const set = {reexam: 1}
@@ -99,7 +119,7 @@ router.get('/getallbydoctor/:id', async (req,res) => {
     const schedules = await Schedule.find({doctorId: id})
     .populate('doctorId')
     .populate('userId')
-    .sort({date: 1})
+    .sort({status: 1, date: 1})
     res.send(schedules)
 })
 
@@ -111,6 +131,13 @@ router.post('/confirmation', async (req,res) => {
     }
     const set = { confirmation : dataset }
 
+    await Schedule.updateOne(condition,set)
+    res.send("update successfully!")
+})
+
+router.post('/noreply', async (req,res) => {
+    const condition = { _id: req.body.id }
+    const set = { confirmation : null }
     await Schedule.updateOne(condition,set)
     res.send("update successfully!")
 })

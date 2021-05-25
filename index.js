@@ -31,6 +31,7 @@ var notificationsRouter = require('./routes/notifications.route');
 var absencesRouter = require('./routes/absence.route');
 var adminsRouter = require('./routes/admin.route');
 var prescriptionsRouter = require('./routes/prescription.route');
+var servicesRouter = require('./routes/service.route');
 
 server.listen(port, () => {
     console.log('listening on *:' + port);
@@ -64,6 +65,7 @@ app.use('/reexams', reexamsRouter)
 app.use('/absences', absencesRouter)
 app.use('/admins', adminsRouter)
 app.use('/prescriptions', prescriptionsRouter)
+app.use('/services', servicesRouter)
 
 
 
