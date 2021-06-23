@@ -150,7 +150,8 @@ function getMonday(d) {
 }
 
 router.get('/getschedulesbyweek/:week', async (req, res) => {
-    const schedules = await Schedule.find({status: 1})
+    const schedule = await Schedule.find()
+    const schedules = schedule.filter(dt => dt.status == 1 || dt.status == 3 )
     const date = new Date()
     const currentMonth = date.getMonth()
     const { week } = req.params
@@ -193,9 +194,10 @@ router.get('/getschedulesbyweek/:week', async (req, res) => {
 })
 
 router.get('/getschedulesbyyear/:year', async (req, res) => {
-    const schedules = await Schedule.find()
+    const schedule = await Schedule.find()
+    const schedules = schedule.filter(dt => dt.status == 1 || dt.status == 3 )
     const yearData = schedules.filter(dt => {
-        return dt.date.getFullYear() == req.params.year && dt.status == 1
+        return dt.date.getFullYear() == req.params.year
     })
     const responseData = []
 

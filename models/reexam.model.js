@@ -9,6 +9,8 @@ const ReexamSchema = new mongoose.Schema({
     scheduleId: { type: Schema.Types.ObjectId, ref: 'schedule' },
     status: Number,
     times: Number,
+    problem: String,
+    note: String,
     confirmation: {
         date: Date,
         begin: Number

@@ -5,6 +5,7 @@ const PrescriptionSchema = new mongoose.Schema({
     date: Date,
     medicine: [
         {   
+            medicineId: { type: Schema.Types.ObjectId, ref: 'medicine' }, 
             price: Number,
             name: String,
             quantity: Number
@@ -15,6 +16,7 @@ const PrescriptionSchema = new mongoose.Schema({
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
     times: Number,
     note: String,
+    disease: String,
     total: Number
 });
 

@@ -15,6 +15,11 @@ router.get('/getallpres/:id', async(req, res) => {
     res.json(pres)
 })
 
+router.post('/delete', async(req, res) => {
+    await Prescription.deleteOne({_id : req.body.id})
+    res.send("Delete successfully")
+})
+
 router.get('/getallprescriptions', async(req, res) => {
     const pres = await Prescription.find()
     .populate('doctorId')

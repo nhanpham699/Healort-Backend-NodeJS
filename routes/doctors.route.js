@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Doctor = require('../models/doctors.model');
+var User = require('../models/users.model');
 var Schedule = require('../models/schedules.model');
 const multer = require("multer");
 const jwt = require('jsonwebtoken')
@@ -29,6 +30,7 @@ router.post('/signup',  upload.single('photo'), async(req, res) => {
         hometown: req.body.hometown,
         gender: req.body.gender,
         experience: req.body.experience,
+        description: req.body.description
     }
     if(req.file){
         const avatar = '/' + req.file.path.replace('\\', "/").replace('\\', "/").replace('\\', "/");
@@ -58,9 +60,10 @@ router.get('/getdoctor', async(req,res) => {
             phone: doctor.phone,
             gender: doctor.gender,
             avatar: doctor.avatar,
-            experience: doctor.experience
+            experience: doctor.experience,
+            description: doctor.description
         }
-        console.log(dataSending);
+        // console.log(dataSending);
         res.send({dataSending})
         
     }catch{
@@ -95,6 +98,7 @@ router.get('/gettopdoctor', async(req,res) => {
                 review: val.review,
                 avatar: val.avatar,
                 experience: val.experience,
+                description: val.description,
                 quantity : 0,
             };
           responseData.push(res[val._id])
@@ -131,6 +135,7 @@ router.get('/getbaddoctor', async(req,res) => {
                 review: val.review,
                 avatar: val.avatar,
                 experience: val.experience,
+                description:  val.description,
                 quantity : 0,
             };
           responseData.push(res[val._id])
@@ -158,7 +163,7 @@ router.get('/getbaddoctor', async(req,res) => {
 })
 
 router.get('/getalldoctors', async(req,res) => {
-    const doctors = await Doctor.find({})
+    const doctors = await Doctor.find({}).populate({path: 'review', populate: { path: 'userId'}})   
     res.json(doctors)
 })
 
@@ -183,7 +188,8 @@ router.post('/login', async(req, res) => {
             phone: doctor.phone,
             gender: doctor.gender,
             avatar: doctor.avatar,
-            experience: doctor.experience
+            experience: doctor.experience,
+            description: doctor.description
         }
         res.send({ data, token })
     } catch (error) {
@@ -220,7 +226,8 @@ router.post('/update', async(req,res) => {
         gender: req.body.gender,
         phone: req.body.phone,
         hometown: req.body.hometown,
-        experience: req.body.experience
+        experience: req.body.experience,
+        description: req.body.description
     }
     await Doctor.updateOne(condition,set)
     res.send('update successfully')
@@ -235,17 +242,34 @@ router.post('/delete', async(req,res) => {
 router.post('/rate', async(req,res) => {
     const condition = {_id : req.body.doctorId }
     const data = await Doctor.findOne(condition)
-    console.log(req.body);
+    // console.log(req.body);
     const set = {
             review: [...data.review,{
                 rating: req.body.rating,
                 comment: req.body.comment,
                 userId: req.body.userId,
-                scheduleId: req.body.scheduleId
+                scheduleId: req.body.scheduleId,
+                state: 0
             }]
         } 
     await Doctor.updateOne(condition,set) 
     res.send('rate successfully')
+})
+
+router.post('/updatereview', async(req,res) => {
+    const {review, doctorId} = req.body
+    const newReview = {...review, state: 1}
+    const condition = {_id: doctorId}
+    const doctor = await Doctor.findOne(condition)
+    const index = doctor.review.findIndex(x => x._id == review._id)
+    // console.log(index);
+    const set = {
+        review: [...doctor.review.slice(0,index), newReview, ...doctor.review.slice(index+1)]
+    }
+    await Doctor.updateOne(condition,set) 
+    const newDoctor = await Doctor.findOne(condition)
+    .populate({path: 'review', populate: { path: 'userId'}})
+    res.json(newDoctor)
 })
 
 module.exports = router;

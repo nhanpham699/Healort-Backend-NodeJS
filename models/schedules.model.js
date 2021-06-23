@@ -4,7 +4,11 @@ const Schema = mongoose.Schema;
 const ScheduleSchema = new mongoose.Schema({ 
     date: Date,  
     begin: Number,
-    services: [],
+    services: [{
+        serviceId: { type: Schema.Types.ObjectId, ref: 'Service' }, 
+        name: String,
+        price: Number
+    }],
     doctorId: { type: Schema.Types.ObjectId, ref: 'doctor' },
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
     note: String,

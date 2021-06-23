@@ -22,11 +22,13 @@ const doctorSchema = new mongoose.Schema({
     hometown: String,
     phone: String,
     gender: String,
+    description: String,
     review: [{
         rating: Number,
         comment: String,
         userId: { type: Schema.Types.ObjectId, ref: 'User' },
         scheduleId: { type: Schema.Types.ObjectId, ref: 'schedule' },
+        state: Number
     }],
     tokens: [{
         token: {

@@ -11,6 +11,7 @@ router.post('/createRoom', async(req, res) => {
         await chat.save()
         res.send("create succuessfully")
     }
+    res.sendStatus(200)
 })
 
 router.get('/showMessages/:room',  async(req, res) => {
